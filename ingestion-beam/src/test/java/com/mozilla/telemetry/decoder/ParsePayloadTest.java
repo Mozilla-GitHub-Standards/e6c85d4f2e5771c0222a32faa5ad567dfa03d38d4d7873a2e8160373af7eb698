@@ -36,7 +36,7 @@ public class ParsePayloadTest {
         .apply("AddAttributes", MapElements.into(TypeDescriptor.of(PubsubMessage.class))
             .via(element -> new PubsubMessage(element.getPayload(), ImmutableMap.of(
                 "document_namespace", "test", "document_type", "test", "document_version", "1"))))
-        .apply(ParsePayload.of(schemasLocation));
+        .apply(ParsePayload.of(schemasLocation, null));
 
     final List<String> expectedMain = Arrays.asList("{}", "{\"id\":null}");
     final PCollection<String> main = output.output().apply("encodeTextMain",
@@ -69,7 +69,7 @@ public class ParsePayloadTest {
     WithErrors.Result<PCollection<PubsubMessage>> result = pipeline //
         .apply(Create.of(input)) //
         .apply(InputFileFormat.json.decode()).output() //
-        .apply(ParsePayload.of(schemasLocation));
+        .apply(ParsePayload.of(schemasLocation, null));
 
     PCollection<String> exceptions = result.errors().apply(MapElements
         .into(TypeDescriptors.strings()).via(message -> message.getAttribute("exception_class")));
@@ -93,7 +93,8 @@ public class ParsePayloadTest {
         + ",\"document_type\":\"main\"" + "},\"payload\":\"eyJ2ZXJzaW9uIjo0fQ==\"}";
 
     WithErrors.Result<PCollection<PubsubMessage>> result = pipeline.apply(Create.of(input))
-        .apply(InputFileFormat.json.decode()).output().apply(ParsePayload.of(schemasLocation));
+        .apply(InputFileFormat.json.decode()).output()
+        .apply(ParsePayload.of(schemasLocation, null));
 
     PCollection<String> exceptions = result.errors().apply(MapElements
         .into(TypeDescriptors.strings()).via(message -> message.getAttribute("exception_class")));
@@ -117,7 +118,7 @@ public class ParsePayloadTest {
     WithErrors.Result<PCollection<PubsubMessage>> result = pipeline //
         .apply(Create.of(input)) //
         .apply(InputFileFormat.text.decode()).output() //
-        .apply(ParsePayload.of(schemasLocation));
+        .apply(ParsePayload.of(schemasLocation, null));
 
     PAssert.that(result.errors()).empty();
 

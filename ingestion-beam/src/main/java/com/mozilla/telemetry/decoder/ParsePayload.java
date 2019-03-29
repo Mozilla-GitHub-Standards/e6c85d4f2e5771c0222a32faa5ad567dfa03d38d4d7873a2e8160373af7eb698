@@ -13,6 +13,7 @@ import com.mozilla.telemetry.util.Json;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage;
 import org.apache.beam.sdk.metrics.Distribution;
 import org.apache.beam.sdk.metrics.Metrics;
@@ -31,8 +32,9 @@ import org.json.JSONObject;
  */
 public class ParsePayload extends MapElementsWithErrors.ToPubsubMessageFrom<PubsubMessage> {
 
-  public static ParsePayload of(ValueProvider<String> schemasLocation) {
-    return new ParsePayload(schemasLocation);
+  public static ParsePayload of(ValueProvider<String> schemasLocation,
+      ValueProvider<String> aliasingConfigurationLocation) {
+    return new ParsePayload(schemasLocation, aliasingConfigurationLocation);
   }
 
   ////////
@@ -43,12 +45,15 @@ public class ParsePayload extends MapElementsWithErrors.ToPubsubMessageFrom<Pubs
       "json_validate_millis");
 
   private final ValueProvider<String> schemasLocation;
+  private final ValueProvider<String> aliasingConfigurationLocation;
 
   private transient Validator validator;
   private transient JSONSchemaStore schemaStore;
 
-  private ParsePayload(ValueProvider<String> schemasLocation) {
+  private ParsePayload(ValueProvider<String> schemasLocation,
+      @Nullable ValueProvider<String> aliasingConfigurationLocation) {
     this.schemasLocation = schemasLocation;
+    this.aliasingConfigurationLocation = aliasingConfigurationLocation;
   }
 
   @Override
@@ -58,7 +63,7 @@ public class ParsePayload extends MapElementsWithErrors.ToPubsubMessageFrom<Pubs
     Map<String, String> attributes = new HashMap<>(message.getAttributeMap());
 
     if (schemaStore == null) {
-      schemaStore = JSONSchemaStore.of(schemasLocation);
+      schemaStore = JSONSchemaStore.of(schemasLocation, aliasingConfigurationLocation);
     }
 
     final int submissionBytes = message.getPayload().length;

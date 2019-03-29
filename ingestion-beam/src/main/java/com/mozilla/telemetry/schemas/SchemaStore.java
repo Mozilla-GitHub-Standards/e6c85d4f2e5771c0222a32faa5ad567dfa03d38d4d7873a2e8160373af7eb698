@@ -167,7 +167,7 @@ public abstract class SchemaStore<T> implements Serializable {
    */
   private Multimap<String, String> loadSchemaAliasesMap() throws IOException {
     Multimap<String, String> aliases = ArrayListMultimap.create();
-    if (schemaAliasesLocation != null) {
+    if (schemaAliasesLocation != null && schemaAliasesLocation.isAccessible()) {
       Metadata metadata = FileSystems.matchSingleFileSpec(schemaAliasesLocation.get());
       InputStream configInputStream = Channels
           .newInputStream(FileSystems.open(metadata.resourceId()));
