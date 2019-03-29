@@ -6,6 +6,7 @@ package com.mozilla.telemetry.schemas;
 
 import com.mozilla.telemetry.util.Json;
 import java.io.IOException;
+import javax.annotation.Nullable;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.io.IOUtils;
@@ -18,11 +19,21 @@ public class JSONSchemaStore extends SchemaStore<Schema> {
 
   /** Returns a SchemaStore based on the contents of the archive at schemasLocation. */
   public static JSONSchemaStore of(ValueProvider<String> schemasLocation) {
-    return new JSONSchemaStore(schemasLocation);
+    return JSONSchemaStore.of(schemasLocation, null);
   }
 
-  protected JSONSchemaStore(ValueProvider<String> schemasLocation) {
-    super(schemasLocation);
+  /**
+   * Returns a SchemaStore based on the contents of the archive at schemasLocation
+   * with additional schemas aliased according to configuration.
+   */
+  public static JSONSchemaStore of(ValueProvider<String> schemasLocation,
+      @Nullable ValueProvider<String> aliasingConfigurationLocation) {
+    return new JSONSchemaStore(schemasLocation, aliasingConfigurationLocation);
+  }
+
+  protected JSONSchemaStore(ValueProvider<String> schemasLocation,
+      @Nullable ValueProvider<String> aliasingConfigurationLocation) {
+    super(schemasLocation, aliasingConfigurationLocation);
   }
 
   @Override
